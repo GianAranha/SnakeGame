@@ -1,14 +1,36 @@
 const canvas = document.querySelector("canvas")
 const ctx = canvas.getContext("2d")
 
+const h1 = document.querySelector("h1")
+
 const size = 30
 
 const snake = [
-    { x: 200, y: 200},
-    { x: 230, y: 200}
+    { x: 270, y: 270},
+    { x: 300, y: 270}
 ]
 
-let direction 
+const randomNumber = (min, max) => {
+    return Math.round(Math.random() * (max-min) + min)
+}
+
+const randomPosition = () => {
+    const number = randomNumber(0, canvas.width-size)
+    return Math.round(number/30) * 30
+}
+
+const food = {
+    x: randomPosition(),
+    y: randomPosition(),
+    color: "orange"
+}
+
+let direction, loopId 
+
+const drawFood = () => {
+    ctx.fillStyle = food.color
+    ctx.fillRect(food.x, food.y, size, size)
+}
 
 const drawSnake = () => {
     ctx.fillStyle = "#ddd"
@@ -35,25 +57,65 @@ const moveSnake = () => {
     }
 
     if (direction == "down") {
-        snake.push({ x: head.x, y: head.y+30})
+        snake.push({ x: head.x, y: head.y+size})
     }
 
     if (direction == "up") {
-        snake.push({ x: head.x, y: head.y-30})
+        snake.push({ x: head.x, y: head.y-size})
     }
 
     snake.shift()
 }
 
-const gameLoop = () => {
-    ctx.clearRect(0, 0, 600, 600)
+const drawGrid = () => {
+    ctx.lineWidth = 1
+    ctx.strokeStyle = "#191919"
 
+    for (let i=30; i<canvas.width; i+=30) {
+        ctx.beginPath()
+        ctx.lineTo(i, 0)
+        ctx.lineTo(i, 600)
+        ctx.stroke()
+    }
+    for (let i=30; i<canvas.width; i+=30) {
+        ctx.beginPath()
+        ctx.lineTo(0,i)
+        ctx.lineTo(600,i)
+        ctx.stroke()
+    }
+}
+
+const gameLoop = () => {
+    clearInterval(loopId)
+
+    ctx.clearRect(0, 0, 600, 600)
+    drawGrid()
+    drawFood()
     moveSnake()
     drawSnake()
 
-    setTimeout(() => {
+    loopId = setTimeout(() => {
         gameLoop()
     }, 300)
 }
 
 gameLoop()
+
+document.addEventListener("keydown", ({key}) => {
+    console.log(key)
+    if (key == "ArrowRight" && direction != "left") {
+        direction = "right"
+    }
+
+    if (key == "ArrowLeft" && direction != "right") {
+        direction = "left"
+    }
+
+    if (key == "ArrowUp" && direction != "down") {
+        direction = "up"
+    }
+
+    if (key == "ArrowDown" && direction != "up") {
+        direction = "down"
+    }
+})
